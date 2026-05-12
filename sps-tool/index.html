@@ -684,7 +684,7 @@ function renderSchool(sess) {
   document.getElementById('school-cards').innerHTML = `
     <div class="sc"><div class="sc-lbl">Entries</div><div class="sc-val">${filtered.length}</div><div class="sc-sub">${activeSchool==='All'?'all schools':activeSchool}</div></div>
     <div class="sc"><div class="sc-lbl">Schools with data</div><div class="sc-val">${schools}</div><div class="sc-sub">of 7 pilot schools</div></div>
-    <div class="sc"><div class="sc-lbl">Student observations</div><div class="sc-val">${obsE.length}</div><div class="sc-sub">this session</div></div>
+    <div class="sc"><div class="sc-lbl">Classroom Observations</div><div class="sc-val">${obsE.length}</div><div class="sc-sub">this session</div></div>
     <div class="sc"><div class="sc-lbl">Follow-ups flagged</div><div class="sc-val">${qE.length}</div><div class="sc-sub">need response</div></div>
   `;
 
@@ -705,7 +705,7 @@ function renderSchool(sess) {
     : st.map(([t,c]) => `<div class="tag on" style="cursor:default">${t}<span class="tc">${c}</span></div>`).join('');
 
   document.getElementById('school-obs').innerHTML = obsE.length === 0
-    ? '<div class="empty-state">No student observations logged yet</div>'
+    ? '<div class="empty-state">No Classroom Observations logged yet</div>'
     : '<div class="obs-list">' + obsE.map(e => `
       <div class="obs-card">
         <div class="oc-top">
@@ -738,7 +738,7 @@ function renderDistrict() {
     <div class="sc"><div class="sc-lbl">Total entries</div><div class="sc-val">${total}</div><div class="sc-sub">across all sessions</div></div>
     <div class="sc"><div class="sc-lbl">Schools logging data</div><div class="sc-val">${schoolsE}</div><div class="sc-sub">of 7 pilot schools</div></div>
     <div class="sc"><div class="sc-lbl">Sessions with data</div><div class="sc-val">${sessD}</div><div class="sc-sub">of 12 planned</div></div>
-    <div class="sc"><div class="sc-lbl">Student observations</div><div class="sc-val">${allObs}</div><div class="sc-sub">total logged</div></div>
+    <div class="sc"><div class="sc-lbl">Classroom Observations</div><div class="sc-val">${allObs}</div><div class="sc-sub">total logged</div></div>
   `;
 
   const td = SESSIONS.map(s => {
