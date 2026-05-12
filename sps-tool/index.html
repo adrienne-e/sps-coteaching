@@ -1475,49 +1475,1028 @@ loadEntries();
       </div>
     </div>
 
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPS Co-Teaching Pilot — Data Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --navy:  #012B59;
+    --sky:   #5B92C2;
+    --teal:  #9DD4D3;
+    --white: #ffffff;
+    --lgray: #F4F6F8;
+    --mgray: #D0D7DE;
+    --dgray: #6B7280;
+    --text:  #111827;
+    --sub:   #6B7280;
+    --bdr:   #E5E7EB;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--lgray);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--navy);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .logo { font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: 0.01em; }
+  .logo span { color: var(--teal); font-weight: 300; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-right select {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .header-right select option { background: var(--navy); }
+  .sync-indicator {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+  }
+  .sync-dot.loading { background: #F5A623; animation: pulse 1s infinite; }
+  .sync-dot.error   { background: #E24B4A; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── LAYOUT ── */
+  .main { max-width: 980px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
+
+  /* ── TABS ── */
+  .view-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1.5rem;
+    background: var(--white);
+    border: 1px solid var(--bdr);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .vtab {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--sub);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .vtab:hover { background: var(--lgray); color: var(--text); }
+  .vtab.active { background: var(--navy); color: var(--white); }
+  .vtab svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* ── STAT CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .sc {
+    background: var(--white);
+    border: 1px solid var(--bdr);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .sc .sc-lbl { font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .sc .sc-val { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .sc .sc-sub { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--bdr);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--bdr);
+  }
+
+  /* ── SCHOOL FILTERS ── */
+  .school-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .sf-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    border-radius: 99px;
+    border: 1px solid var(--bdr);
+    background: var(--white);
+    color: var(--sub);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sf-btn:hover { border-color: var(--sky); color: var(--sky); }
+  .sf-btn.active { background: var(--sky); color: var(--white); border-color: var(--sky); }
+
+  /* ── BARS ── */
+  .bar-group { margin-bottom: 10px; }
+  .bar-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 4px; }
+  .bar-row .bv { font-weight: 700; color: var(--text); }
+  .bar-track { height: 8px; background: var(--lgray); border-radius: 99px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+  /* ── TAGS ── */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 12px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    border: 1px solid var(--bdr);
+    color: var(--sub);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Lato', sans-serif;
+    user-select: none;
+  }
+  .tag:hover { border-color: var(--navy); color: var(--navy); }
+  .tag.on { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .tag .tc { font-weight: 700; margin-left: 3px; opacity: 0.7; }
+
+  /* ── OBSERVATION CARDS ── */
+  .obs-list { display: flex; flex-direction: column; gap: 8px; }
+  .obs-card {
+    background: var(--lgray);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .obs-card .oc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .b-l1  { background: #FAECE7; color: #993C1D; }
+  .b-l2  { background: #FAEEDA; color: #854F0B; }
+  .b-l3  { background: #EAF3DE; color: #3B6D11; }
+  .b-l4  { background: #E6F1FB; color: #185FA5; }
+  .b-tt  { background: #E6F1FB; color: #0C447C; }
+  .b-ets { background: #E1F5EE; color: #0F6E56; }
+  .obs-card .oc-text { color: var(--text); line-height: 1.5; }
+  .obs-card .oc-next { font-size: 12px; color: var(--sub); margin-top: 5px; }
+  .obs-card .oc-meta { font-size: 11px; color: #9CA3AF; margin-top: 5px; }
+
+  /* ── QUESTION CARDS ── */
+  .q-list { display: flex; flex-direction: column; gap: 8px; }
+  .q-card {
+    background: var(--lgray);
+    border-left: 3px solid var(--sky);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .q-card .qc-meta { font-size: 11px; color: #9CA3AF; margin-top: 5px; }
+
+  /* ── SCHOOL MINI CARDS ── */
+  .school-grid-dist { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: 8px; }
+  .school-mini { border: 1px solid var(--bdr); border-radius: 8px; padding: 10px 12px; background: var(--white); }
+  .school-mini .sm-name { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-g { background: #639922; }
+  .dot-a { background: #BA7517; }
+  .dot-r { background: #E24B4A; }
+  .dot-n { background: #B4B2A9; }
+  .sm-mini-bar { margin-bottom: 5px; }
+  .sm-mini-lbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); margin-bottom: 2px; }
+  .sm-mini-track { height: 5px; background: var(--lgray); border-radius: 99px; overflow: hidden; }
+  .sm-mini-fill  { height: 100%; border-radius: 99px; }
+  .sm-last { font-size: 11px; color: #9CA3AF; margin-top: 6px; }
+
+  /* ── FORM ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-label { font-size: 13px; font-weight: 700; color: var(--sub); margin-bottom: 5px; display: block; }
+  input[type=text], select, textarea {
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--lgray);
+    border: 1px solid var(--bdr);
+    border-radius: 8px;
+    padding: 9px 12px;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+  }
+  input[type=text]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--sky);
+    background: var(--white);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  .range-group { margin-bottom: 14px; }
+  .range-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .range-header .rl { font-size: 13px; color: var(--text); }
+  .range-header .rv { font-size: 13px; font-weight: 700; color: var(--navy); min-width: 28px; text-align: right; }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--navy);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+
+  .save-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .save-btn:hover { background: #01376e; }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toast {
+    display: none;
+    background: var(--navy);
+    color: var(--white);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 12px;
+    width: fit-content;
+  }
+  .toast.show { display: block; }
+  .toast.error { background: #A32D2D; }
+
+  /* ── CHART LEGEND ── */
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; font-size: 12px; color: var(--sub); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-line { width: 22px; height: 2px; }
+
+  /* ── LOOK-FORS ── */
+  .lf-domain {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--navy);
+    background: var(--lgray);
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 12px 0 6px;
+  }
+  .lf-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bdr);
+  }
+  .lf-indicator {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.45;
+    padding-top: 2px;
+  }
+  .lf-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+    width: 220px;
+  }
+  .lf-rating {
+    display: flex;
+    gap: 4px;
+  }
+  .lf-btn {
+    flex: 1;
+    padding: 5px 4px;
+    font-size: 12px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid var(--bdr);
+    background: var(--lgray);
+    color: var(--sub);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+  .lf-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .lf-btn.sel-1 { background: #FCEBEB; color: #A32D2D; border-color: #E24B4A; }
+  .lf-btn.sel-2 { background: #FAEEDA; color: #854F0B; border-color: #EF9F27; }
+  .lf-btn.sel-3 { background: #EAF3DE; color: #3B6D11; border-color: #97C459; }
+  .lf-note {
+    width: 100%;
+    font-size: 12px;
+    font-family: 'Lato', sans-serif;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--bdr);
+    background: var(--lgray);
+    color: var(--text);
+  }
+  .lf-note:focus { outline: none; border-color: var(--sky); background: var(--white); }
+  @media (max-width: 600px) {
+    .lf-row { flex-direction: column; }
+    .lf-controls { width: 100%; }
+  }
+
+  /* ── OBS SUMMARY CARD ── */
+  .obs-domain { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sub); margin: 10px 0 5px; }
+  .obs-indicator-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--bdr); gap: 8px; }
+  .obs-indicator-row:last-child { border-bottom: none; }
+  .obs-ind-text { flex: 1; color: var(--text); }
+  .obs-score { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+  .score-1 { background: #FCEBEB; color: #A32D2D; }
+  .score-2 { background: #FAEEDA; color: #854F0B; }
+  .score-3 { background: #EAF3DE; color: #3B6D11; }
+  .score-na { background: var(--lgray); color: var(--sub); }
+  .obs-note-text { font-size: 11px; color: var(--sub); margin-top: 2px; font-style: italic; }
+
+  /* ── MISC ── */
+  .empty-state { text-align: center; padding: 2rem 0; font-size: 13px; color: #9CA3AF; }
+  .mb { margin-bottom: 12px; }
+
+  @media (max-width: 640px) {
+    .main { padding: 1rem 1rem 5rem; }
+    .app-header { padding: 0 1rem; }
+    .vtab { font-size: 12px; padding: 7px 6px; }
+    .sync-indicator .sync-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo">SPS Co-Teaching <span>Pilot Dashboard</span></div>
+  <div class="header-right">
+    <select id="sess-sel" onchange="render()" aria-label="Select session">
+      <option value="PLC #1 Sept">PLC #1 — Sept</option>
+      <option value="PLC #2 Oct">PLC #2 — Oct</option>
+      <option value="Nov 3 PD">Nov 3 PD</option>
+      <option value="PLC #3 Nov">PLC #3 — Nov</option>
+      <option value="PLC #4 Dec">PLC #4 — Dec</option>
+      <option value="Jan 6 PD">Jan 6 PD</option>
+      <option value="PLC #5 Jan">PLC #5 — Jan</option>
+      <option value="PLC #6 Feb">PLC #6 — Feb</option>
+      <option value="PLC #7 Mar">PLC #7 — Mar</option>
+      <option value="PLC #8 Apr">PLC #8 — Apr</option>
+      <option value="PLC #9 May">PLC #9 — May</option>
+      <option value="PLC #10 Jun">PLC #10 — Jun</option>
+    </select>
+    <div class="sync-indicator" id="sync-indicator">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span class="sync-label" id="sync-label">Live</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="view-tabs" role="tablist">
+    <button class="vtab active" role="tab" aria-selected="true" onclick="setView('school',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      School view
+    </button>
+    <button class="vtab" role="tab" aria-selected="false" onclick="setView('district',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      District view
+    </button>
+    <button class="vtab" role="tab" aria-selected="false" onclick="setView('enter',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Enter data
+    </button>
+  </div>
+
+  <!-- SCHOOL VIEW -->
+  <div id="v-school" class="view on" role="tabpanel">
+    <div class="school-filters" id="school-filters"></div>
+    <div class="cards-grid" id="school-cards"></div>
     <div class="panel">
-      <div class="panel-title">Student language observation</div>
-      <div class="form-grid mb">
+      <div class="panel-title">Partnership pulse — this session</div>
+      <div id="school-pulse"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Observation themes flagged</div>
+      <div class="tag-cloud" id="school-themes"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Classroom observations — look-fors summary</div>
+      <div id="school-obs"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Open questions and follow-ups</div>
+      <div id="school-questions"></div>
+    </div>
+  </div>
+
+  <!-- DISTRICT VIEW -->
+  <div id="v-district" class="view" role="tabpanel">
+    <div class="cards-grid" id="dist-cards"></div>
+    <div class="panel">
+      <div class="panel-title">Pulse trends across sessions</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-line" style="background:#5B92C2"></div>Co-planning</div>
+        <div class="legend-item"><div class="legend-line" style="border-top:2px dashed #9DD4D3;height:0;width:22px"></div>Roles clear</div>
+        <div class="legend-item"><div class="legend-line" style="border-top:2px dotted #012B59;height:0;width:22px"></div>Student language</div>
+      </div>
+      <div style="position:relative;width:100%;height:220px">
+        <canvas id="trendChart" role="img" aria-label="Line chart showing partnership pulse trends across all PLC sessions">Partnership pulse trend data across pilot year sessions.</canvas>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">School-by-school snapshot — all sessions</div>
+      <div class="school-grid-dist" id="dist-schools"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Top themes across the pilot year</div>
+      <div id="dist-themes"></div>
+    </div>
+  </div>
+
+  <!-- ENTER DATA -->
+  <div id="v-enter" class="view" role="tabpanel">
+    <div class="panel">
+      <div class="panel-title">School and session context</div>
+      <div class="form-grid">
         <div>
-          <label class="form-label" for="e-student">Student (initials)</label>
-          <input type="text" id="e-student" placeholder="e.g. A.K.">
-        </div>
-        <div>
-          <label class="form-label" for="e-elp">ELP level</label>
-          <select id="e-elp">
-            <option value="">Select</option>
-            <option value="L1">Level 1</option>
-            <option value="L2">Level 2</option>
-            <option value="L3">Level 3</option>
-            <option value="L4">Level 4</option>
+          <label class="form-label" for="e-school">School</label>
+          <select id="e-school">
+            <option value="">Select school</option>
+            <option>Beal</option>
+            <option>IOE</option>
+            <option>Walsh</option>
+            <option>Swan</option>
+            <option>Lynch</option>
+            <option>Talmadge</option>
+            <option>DeBerry</option>
           </select>
         </div>
-      </div>
-      <div class="form-grid mb">
         <div>
-          <label class="form-label" for="e-model">Model in use</label>
-          <select id="e-model">
-            <option value="">Select</option>
-            <option value="TT">Team Teaching</option>
-            <option value="ETS">Each Teach Separately</option>
-          </select>
+          <label class="form-label" for="e-pair">Co-teaching pair (initials)</label>
+          <input type="text" id="e-pair" placeholder="e.g. MR + DL">
         </div>
-        <div></div>
       </div>
-      <div class="mb">
-        <label class="form-label" for="e-obs">What did this student say or write?</label>
-        <textarea id="e-obs" placeholder="Specific language observed — vocabulary used, sentence structure, discourse..."></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Partnership pulse — rate 0 to 100</div>
+      <div class="range-group">
+        <div class="range-header"><span class="rl">Co-planning happening consistently</span><span class="rv" id="rv1">50</span></div>
+        <input type="range" min="0" max="100" value="50" id="r1" aria-label="Co-planning score" oninput="document.getElementById('rv1').textContent=this.value">
       </div>
-      <div>
-        <label class="form-label" for="e-next">What does it suggest for next steps?</label>
-        <textarea id="e-next" placeholder="What might this mean for instruction or for this student's Ellevation record?"></textarea>
+      <div class="range-group">
+        <div class="range-header"><span class="rl">Roles feel clear and shared</span><span class="rv" id="rv2">50</span></div>
+        <input type="range" min="0" max="100" value="50" id="r2" aria-label="Roles score" oninput="document.getElementById('rv2').textContent=this.value">
       </div>
+      <div class="range-group">
+        <div class="range-header"><span class="rl">Students producing language</span><span class="rv" id="rv3">50</span></div>
+        <input type="range" min="0" max="100" value="50" id="r3" aria-label="Student language score" oninput="document.getElementById('rv3').textContent=this.value">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Observation themes — select all that apply</div>
+      <div class="tag-cloud" id="theme-pick">
+        <div class="tag" onclick="this.classList.toggle('on')">Co-plan time squeezed</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Role clarity</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Level 1 students</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Language objectives</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Reach alignment</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Student talk time</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Differentiation</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Schedule fidelity</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Partnership tension</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Parity</div>
+        <div class="tag" onclick="this.classList.toggle('on')">Bright spot</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Classroom observation — ESL look-fors</div>
+      <p style="font-size:12px;color:var(--sub);margin-bottom:1rem">Rate each indicator: 1 = Not yet evident &nbsp;&middot;&nbsp; 2 = Emerging &nbsp;&middot;&nbsp; 3 = Consistent. Add a brief note where helpful.</p>
+
+      <div class="lf-domain">Learning Environment</div>
+      <div class="lf-row">
+        <div class="lf-indicator">Both teachers' presence and authority visible — shared space, materials, equal status</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf1"></div>
+          <input type="text" class="lf-note" id="lf1n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Language-rich environment: vocabulary displays, sentence frames, student work posted</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf2"></div>
+          <input type="text" class="lf-note" id="lf2n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Culturally and linguistically sustaining elements visible</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf3"></div>
+          <input type="text" class="lf-note" id="lf3n" placeholder="Note (optional)">
+        </div>
+      </div>
+
+      <div class="lf-domain">Co-Teaching Model</div>
+      <div class="lf-row">
+        <div class="lf-indicator">Clear evidence of the selected model — Team Teaching or Each Teach Separately</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf4"></div>
+          <input type="text" class="lf-note" id="lf4n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Both teachers actively fulfilling their roles — not one leading while one observes</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf5"></div>
+          <input type="text" class="lf-note" id="lf5n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Smooth transitions; evidence of prior co-planning</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf6"></div>
+          <input type="text" class="lf-note" id="lf6n" placeholder="Note (optional)">
+        </div>
+      </div>
+
+      <div class="lf-domain">Language-Focused Instruction</div>
+      <div class="lf-row">
+        <div class="lf-indicator">Explicit language objective present and communicated to students</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf7"></div>
+          <input type="text" class="lf-note" id="lf7n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Vocabulary/syntax instruction: intentional, visual, connected to the text</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf8"></div>
+          <input type="text" class="lf-note" id="lf8n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Student talk is structured and language-demanding — not just yes/no responses</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf9"></div>
+          <input type="text" class="lf-note" id="lf9n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Scaffolds visible and differentiated by ELP level</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf10"></div>
+          <input type="text" class="lf-note" id="lf10n" placeholder="Note (optional)">
+        </div>
+      </div>
+
+      <div class="lf-domain">Student Language Production</div>
+      <div class="lf-row">
+        <div class="lf-indicator">MLs speaking in academic English using target vocabulary and sentence structures</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf11"></div>
+          <input type="text" class="lf-note" id="lf11n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row">
+        <div class="lf-indicator">Students at all ELP levels engaged and producing language at their level</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf12"></div>
+          <input type="text" class="lf-note" id="lf12n" placeholder="Note (optional)">
+        </div>
+      </div>
+      <div class="lf-row" style="border-bottom:none">
+        <div class="lf-indicator">Evidence of language growth relative to prior observations</div>
+        <div class="lf-controls">
+          <div class="lf-rating" id="lf13"></div>
+          <input type="text" class="lf-note" id="lf13n" placeholder="Note (optional)">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Overall notes and next steps</div>
+      <textarea id="e-overall" placeholder="Overall narrative, strengths, areas for growth, and any follow-up actions for this co-teaching pair..."></textarea>
     </div>
 
     <div class="panel">
       <div class="panel-title">Open questions or follow-up needed</div>
       <textarea id="e-questions" placeholder="Anything Kara, Yanira, or Adrienne needs to follow up on after this session?"></textarea>
     </div>
+
+    <button class="save-btn" id="save-btn" onclick="saveEntry()">Save entry</button>
+    <div class="toast" id="toast">Entry saved.</div>
+  </div>
+
+</main>
+
+<script>
+const SCHOOLS = ['Beal','IOE','Walsh','Swan','Lynch','Talmadge','DeBerry'];
+const SESSIONS = ['PLC #1 Sept','PLC #2 Oct','Nov 3 PD','PLC #3 Nov','PLC #4 Dec','Jan 6 PD','PLC #5 Jan','PLC #6 Feb','PLC #7 Mar','PLC #8 Apr','PLC #9 May','PLC #10 Jun'];
+const API = '/api/entries';
+
+let entries = [];
+let currentView = 'school';
+let activeSchool = 'All';
+let trendChart = null;
+
+// ── SYNC INDICATOR ─────────────────────────────────────────────
+function setSyncState(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot';
+  if (state === 'loading') { dot.classList.add('loading'); lbl.textContent = 'Syncing'; }
+  else if (state === 'error') { dot.classList.add('error'); lbl.textContent = 'Offline'; }
+  else { lbl.textContent = 'Live'; }
+}
+
+// ── LOAD ENTRIES FROM NETLIFY BLOBS ────────────────────────────
+async function loadEntries() {
+  setSyncState('loading');
+  try {
+    const res = await fetch(API);
+    if (!res.ok) throw new Error('API error');
+    entries = await res.json();
+    setSyncState('live');
+  } catch (e) {
+    setSyncState('error');
+    // Graceful fallback: try localStorage
+    try {
+      const raw = localStorage.getItem('sps_entries_fallback');
+      if (raw) entries = JSON.parse(raw);
+    } catch (_) {}
+  }
+  render();
+}
+
+// ── SAVE ENTRY TO NETLIFY BLOBS ────────────────────────────────
+async function saveEntry() {
+  const school = document.getElementById('e-school').value;
+  const pair   = document.getElementById('e-pair').value.trim();
+  if (!school || !pair) { alert('Please select a school and enter teacher initials.'); return; }
+
+  const session = document.getElementById('sess-sel').value;
+  const themes  = [...document.querySelectorAll('#theme-pick .tag.on')].map(t => t.textContent.trim());
+
+  // Collect look-fors ratings and notes
+  const lookfors = [];
+  const lfDefs = [
+    {domain:'Learning Environment', text:"Both teachers' presence and authority visible"},
+    {domain:'Learning Environment', text:'Language-rich environment: vocab displays, sentence frames, student work'},
+    {domain:'Learning Environment', text:'Culturally and linguistically sustaining elements visible'},
+    {domain:'Co-Teaching Model',    text:'Clear evidence of the selected model'},
+    {domain:'Co-Teaching Model',    text:'Both teachers actively fulfilling their roles'},
+    {domain:'Co-Teaching Model',    text:'Smooth transitions; evidence of prior co-planning'},
+    {domain:'Language-Focused Instruction', text:'Explicit language objective present and communicated'},
+    {domain:'Language-Focused Instruction', text:'Vocabulary/syntax instruction: intentional, visual, connected'},
+    {domain:'Language-Focused Instruction', text:'Student talk structured and language-demanding'},
+    {domain:'Language-Focused Instruction', text:'Scaffolds visible and differentiated by ELP level'},
+    {domain:'Student Language Production',  text:'MLs using target vocabulary and sentence structures'},
+    {domain:'Student Language Production',  text:'Students at all ELP levels engaged and producing language'},
+    {domain:'Student Language Production',  text:'Evidence of language growth relative to prior observations'},
+  ];
+  lfDefs.forEach((def, i) => {
+    const n = i + 1;
+    const selected = document.querySelector(`#lf${n} .lf-btn.sel-1, #lf${n} .lf-btn.sel-2, #lf${n} .lf-btn.sel-3`);
+    lookfors.push({
+      domain: def.domain,
+      text: def.text,
+      score: selected ? parseInt(selected.dataset.val) : null,
+      note: document.getElementById(`lf${n}n`).value.trim()
+    });
+  });
+
+  const entry = {
+    id: Date.now(), session, school, pair,
+    pulse: {
+      planning: parseInt(document.getElementById('r1').value),
+      roles:    parseInt(document.getElementById('r2').value),
+      students: parseInt(document.getElementById('r3').value)
+    },
+    themes,
+    lookfors,
+    overall: document.getElementById('e-overall').value.trim(),
+    questions: document.getElementById('e-questions').value.trim(),
+    ts: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+  };
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  setSyncState('loading');
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    });
+    if (!res.ok) throw new Error('Save failed');
+    entries.push(entry);
+    // Keep a local copy as fallback
+    try { localStorage.setItem('sps_entries_fallback', JSON.stringify(entries)); } catch(_) {}
+    setSyncState('live');
+    showToast('Entry saved.', false);
+    resetForm();
+    render();
+  } catch (e) {
+    setSyncState('error');
+    showToast('Could not save — check your connection.', true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function resetForm() {
+  ['e-school','e-pair','e-overall','e-questions']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['r1','r2','r3'].forEach((id,i) => {
+    document.getElementById(id).value = 50;
+    document.getElementById('rv'+(i+1)).textContent = '50';
+  });
+  document.querySelectorAll('#theme-pick .tag.on').forEach(t => t.classList.remove('on'));
+  // Reset look-fors
+  for(let n=1;n<=13;n++) {
+    document.querySelectorAll(`#lf${n} .lf-btn`).forEach(b=>b.classList.remove('sel-1','sel-2','sel-3'));
+    const noteEl = document.getElementById(`lf${n}n`);
+    if(noteEl) noteEl.value = '';
+  }
+}
+
+// ── VIEW SWITCHING ──────────────────────────────────────────────
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.vtab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  render();
+}
+
+function setSchool(s) { activeSchool = s; render(); }
+
+// ── HELPERS ─────────────────────────────────────────────────────
+const avg = arr => arr.length ? Math.round(arr.reduce((a,b) => a+b, 0) / arr.length) : null;
+
+function renderBar(label, val, color) {
+  const display = val === null
+    ? `<span class="bv" style="color:#9CA3AF">no data</span>`
+    : `<span class="bv">${val}</span>`;
+  const width = val === null ? 0 : val;
+  return `<div class="bar-group">
+    <div class="bar-row"><span>${label}</span>${display}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${width}%;background:${color}"></div></div>
+  </div>`;
+}
+
+function miniBar(lbl, val, col) {
+  if (val === null) return '';
+  return `<div class="sm-mini-bar">
+    <div class="sm-mini-lbl"><span>${lbl}</span><span>${val}</span></div>
+    <div class="sm-mini-track"><div class="sm-mini-fill" style="width:${val}%;background:${col}"></div></div>
+  </div>`;
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render() {
+  const sess = document.getElementById('sess-sel').value;
+  if (currentView === 'school')   renderSchool(sess);
+  if (currentView === 'district') renderDistrict();
+}
+
+function renderSchool(sess) {
+  // School filter buttons
+  const filterHTML = ['All', ...SCHOOLS].map(s =>
+    `<button class="sf-btn ${activeSchool===s?'active':''}" onclick="setSchool('${s.replace(/'/g,"\\'")}')">
+      ${s === 'All' ? 'All schools' : s}
+    </button>`
+  ).join('');
+  document.getElementById('school-filters').innerHTML = filterHTML;
+
+  const sessE    = entries.filter(e => e.session === sess);
+  const filtered = activeSchool === 'All' ? sessE : sessE.filter(e => e.school === activeSchool);
+  const schools  = [...new Set(filtered.map(e => e.school))].length;
+  const obsE     = filtered.filter(e => e.lookfors && e.lookfors.some(l=>l.score));
+  const qE       = filtered.filter(e => e.questions);
+
+  document.getElementById('school-cards').innerHTML = `
+    <div class="sc"><div class="sc-lbl">Entries</div><div class="sc-val">${filtered.length}</div><div class="sc-sub">${activeSchool==='All'?'all schools':activeSchool}</div></div>
+    <div class="sc"><div class="sc-lbl">Schools with data</div><div class="sc-val">${schools}</div><div class="sc-sub">of 7 pilot schools</div></div>
+    <div class="sc"><div class="sc-lbl">Observations logged</div><div class="sc-val">${obsE.length}</div><div class="sc-sub">with look-fors data</div></div>
+    <div class="sc"><div class="sc-lbl">Follow-ups flagged</div><div class="sc-val">${qE.length}</div><div class="sc-sub">need response</div></div>
+  `;
+
+  const p1 = avg(filtered.map(e => e.pulse.planning));
+  const p2 = avg(filtered.map(e => e.pulse.roles));
+  const p3 = avg(filtered.map(e => e.pulse.students));
+  document.getElementById('school-pulse').innerHTML = filtered.length === 0
+    ? '<div class="empty-state">No entries yet for this session</div>'
+    : renderBar('Co-planning happening consistently', p1, '#5B92C2')
+    + renderBar('Roles feel clear and shared', p2, '#9DD4D3')
+    + renderBar('Students producing language', p3, '#012B59');
+
+  const tc = {};
+  filtered.forEach(e => { (e.themes||[]).forEach(t => { tc[t] = (tc[t]||0)+1; }); });
+  const st = Object.entries(tc).sort((a,b) => b[1]-a[1]);
+  document.getElementById('school-themes').innerHTML = st.length === 0
+    ? '<span style="font-size:13px;color:#9CA3AF">No themes flagged yet</span>'
+    : st.map(([t,c]) => `<div class="tag on" style="cursor:default">${t}<span class="tc">${c}</span></div>`).join('');
+
+  // Look-fors display
+  if (obsE.length === 0) {
+    document.getElementById('school-obs').innerHTML = '<div class="empty-state">No classroom observations logged yet</div>';
+  } else {
+    const domains = ['Learning Environment','Co-Teaching Model','Language-Focused Instruction','Student Language Production'];
+    const scoreLabel = s => s===1?'Not yet':s===2?'Emerging':s===3?'Consistent':'';
+    const scoreClass = s => s===1?'score-1':s===2?'score-2':s===3?'score-3':'score-na';
+    document.getElementById('school-obs').innerHTML = '<div class="obs-list">' +
+      obsE.map(e => {
+        const domainHTML = domains.map(domain => {
+          const items = (e.lookfors||[]).filter(l=>l.domain===domain);
+          if(!items.length) return '';
+          return `<div class="obs-domain">${domain}</div>` +
+            items.map(l=>`
+              <div class="obs-indicator-row">
+                <span class="obs-ind-text">${l.text}</span>
+                <span class="obs-score ${scoreClass(l.score)}">${l.score ? scoreLabel(l.score) : 'Not rated'}</span>
+              </div>
+              ${l.note?`<div class="obs-note-text" style="padding:0 0 4px 8px">${l.note}</div>`:''}`).join('');
+        }).join('');
+        return `<div class="obs-card">
+          <div class="oc-top"><strong>${e.school}</strong><span style="color:#9CA3AF;font-size:12px">${e.pair} &middot; ${e.ts}</span></div>
+          ${domainHTML}
+          ${e.overall?`<div style="margin-top:8px;font-size:12px;color:var(--sub);border-top:1px solid var(--bdr);padding-top:8px"><strong>Notes:</strong> ${e.overall}</div>`:''}
+        </div>`;
+      }).join('') + '</div>';
+  }
+
+  document.getElementById('school-questions').innerHTML = qE.length === 0
+    ? '<div class="empty-state">No follow-ups flagged</div>'
+    : '<div class="q-list">' + qE.map(e => `
+      <div class="q-card">
+        ${e.questions}
+        <div class="qc-meta">${e.school} &middot; ${e.pair} &middot; ${e.ts}</div>
+      </div>`).join('') + '</div>';
+}
+
+function renderDistrict() {
+  const total   = entries.length;
+  const allObs  = entries.filter(e => e.lookfors && e.lookfors.some(l=>l.score)).length;
+  const schoolsE = [...new Set(entries.map(e => e.school))].length;
+  const sessD   = [...new Set(entries.map(e => e.session))].length;
+
+  document.getElementById('dist-cards').innerHTML = `
+    <div class="sc"><div class="sc-lbl">Total entries</div><div class="sc-val">${total}</div><div class="sc-sub">across all sessions</div></div>
+    <div class="sc"><div class="sc-lbl">Schools logging data</div><div class="sc-val">${schoolsE}</div><div class="sc-sub">of 7 pilot schools</div></div>
+    <div class="sc"><div class="sc-lbl">Sessions with data</div><div class="sc-val">${sessD}</div><div class="sc-sub">of 12 planned</div></div>
+    <div class="sc"><div class="sc-lbl">Observations logged</div><div class="sc-val">${allObs}</div><div class="sc-sub">with look-fors data</div></div>
+  `;
+
+  const td = SESSIONS.map(s => {
+    const se = entries.filter(e => e.session === s);
+    return { l: s.replace('PLC #','#').replace(' PD',''), p: avg(se.map(e=>e.pulse.planning)), r: avg(se.map(e=>e.pulse.roles)), s2: avg(se.map(e=>e.pulse.students)) };
+  });
+
+  const ctx = document.getElementById('trendChart');
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: td.map(d => d.l),
+      datasets: [
+        { label:'Co-planning',    data:td.map(d=>d.p),  borderColor:'#5B92C2', backgroundColor:'transparent', borderWidth:2, pointRadius:3, spanGaps:true, borderDash:[] },
+        { label:'Roles clear',    data:td.map(d=>d.r),  borderColor:'#9DD4D3', backgroundColor:'transparent', borderWidth:2, pointRadius:3, spanGaps:true, borderDash:[5,3] },
+        { label:'Student language',data:td.map(d=>d.s2),borderColor:'#012B59', backgroundColor:'transparent', borderWidth:2, pointRadius:3, spanGaps:true, borderDash:[2,2] }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales: {
+        y:{ min:0, max:100, ticks:{ font:{size:11}, color:'#6B7280' }, grid:{ color:'rgba(0,0,0,0.05)' } },
+        x:{ ticks:{ font:{size:10}, color:'#6B7280', autoSkip:false, maxRotation:40 }, grid:{ display:false } }
+      }
+    }
+  });
+
+  document.getElementById('dist-schools').innerHTML = SCHOOLS.map(school => {
+    const se = entries.filter(e => e.school === school);
+    const last = se.length ? se[se.length-1].session : null;
+    const p = avg(se.map(e=>e.pulse.planning));
+    const r = avg(se.map(e=>e.pulse.roles));
+    const s = avg(se.map(e=>e.pulse.students));
+    const mn = se.length ? Math.min(p||0,r||0,s||0) : null;
+    const dc = mn===null?'dot-n':mn>65?'dot-g':mn>40?'dot-a':'dot-r';
+    return `<div class="school-mini">
+      <div class="sm-name"><span class="status-dot ${dc}"></span>${school}</div>
+      ${se.length===0 ? '<div style="font-size:12px;color:#9CA3AF">No data yet</div>'
+        : miniBar('Co-planning',p,'#5B92C2') + miniBar('Roles',r,'#9DD4D3') + miniBar('Students',s,'#012B59')
+        + `<div class="sm-last">Last: ${last} &middot; ${se.length} entr${se.length===1?'y':'ies'}</div>`}
+    </div>`;
+  }).join('');
+
+  const atc = {};
+  entries.forEach(e => { (e.themes||[]).forEach(t => { atc[t]=(atc[t]||0)+1; }); });
+  const sa = Object.entries(atc).sort((a,b) => b[1]-a[1]);
+  const mx = sa.length ? sa[0][1] : 1;
+  document.getElementById('dist-themes').innerHTML = sa.length === 0
+    ? '<div class="empty-state">No themes logged yet</div>'
+    : sa.map(([t,c]) => `<div class="bar-group">
+        <div class="bar-row"><span>${t}</span><span class="bv">${c} time${c===1?'':'s'}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round((c/mx)*100)}%;background:#5B92C2"></div></div>
+      </div>`).join('');
+}
+
+// Auto-refresh every 60 seconds when on school or district view
+setInterval(() => { if(currentView !== 'enter') loadEntries(); }, 60000);
+
+// Initialise look-fors rating buttons
+function initLookfors() {
+  for (let n = 1; n <= 13; n++) {
+    const container = document.getElementById(`lf${n}`);
+    if (!container) continue;
+    [1,2,3].forEach(val => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lf-btn';
+      btn.dataset.val = val;
+      btn.textContent = val === 1 ? '1 Not yet' : val === 2 ? '2 Emerging' : '3 Consistent';
+      btn.onclick = () => {
+        container.querySelectorAll('.lf-btn').forEach(b => b.classList.remove('sel-1','sel-2','sel-3'));
+        btn.classList.add(`sel-${val}`);
+      };
+      container.appendChild(btn);
+    });
+  }
+}
+
+initLookfors();
+loadEntries();
+</script>
+</body>
+</html>
 
     <button class="save-btn" id="save-btn" onclick="saveEntry()">Save entry</button>
     <div class="toast" id="toast">Entry saved.</div>
