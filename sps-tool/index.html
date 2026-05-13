@@ -407,7 +407,22 @@
 <header class="app-header">
   <div class="logo">SPS Co-Teaching <span>Pilot Dashboard</span></div>
   <div class="header-right">
-    <div id="current-session-label" style="font-size:13px;color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.1);padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.2)"></div>
+    <select id="sess-sel" onchange="setSession(this.value)" aria-label="Select session" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:var(--white);padding:5px 10px;border-radius:6px;font-family:'Lato',sans-serif;font-size:13px;cursor:pointer;">
+      <option value="June 2 Kickoff PD">June 2 Kickoff PD</option>
+      <option value="Aug 19 PD">Aug 19 PD</option>
+      <option value="PLC #1 Sept">PLC #1 — Sept</option>
+      <option value="PLC #2 Oct">PLC #2 — Oct</option>
+      <option value="Nov 3 PD">Nov 3 PD</option>
+      <option value="PLC #3 Nov">PLC #3 — Nov</option>
+      <option value="PLC #4 Dec">PLC #4 — Dec</option>
+      <option value="Jan 6 PD">Jan 6 PD</option>
+      <option value="PLC #5 Jan">PLC #5 — Jan</option>
+      <option value="PLC #6 Feb">PLC #6 — Feb</option>
+      <option value="PLC #7 Mar">PLC #7 — Mar</option>
+      <option value="PLC #8 Apr">PLC #8 — Apr</option>
+      <option value="PLC #9 May">PLC #9 — May</option>
+      <option value="PLC #10 Jun">PLC #10 — Jun</option>
+    </select>
     <div class="sync-indicator" id="sync-indicator">
       <div class="sync-dot" id="sync-dot"></div>
       <span class="sync-label" id="sync-label">Live</span>
@@ -849,7 +864,7 @@ function setView(v, btn) {
 
 function setSchool(s) { activeSchool = s; render(); }
 
-function setSession(key) { activeSession = key; updateSessionLabel(); render(); }
+function setSession(key) { activeSession = key; render(); }
 
 // ── HELPERS ─────────────────────────────────────────────────────
 const avg = arr => arr.length ? Math.round(arr.reduce((a,b) => a+b, 0) / arr.length) : null;
@@ -880,18 +895,16 @@ function render() {
 }
 
 function renderSchool(sessKey) {
-  // Session filter buttons
-  const sessionFilterHTML = SESSION_RANGES.map(s =>
-    `<button class="sf-btn ${activeSession===s.key?'active':''}" onclick="setSession('${s.key}')">${s.label}</button>`
+  // Sync dropdown to active session
+  const sel = document.getElementById('sess-sel');
+  if (sel) sel.value = sessKey;
+
+  // School filter buttons only
+  document.getElementById('school-filters').innerHTML = ['All',...SCHOOLS].map(s =>
+    `<button class="sf-btn ${activeSchool===s?'active':''}" onclick="setSchool('${s.replace(/'/g,"\\'")}')">
+      ${s==='All'?'All schools':s}
+    </button>`
   ).join('');
-  document.getElementById('school-filters').innerHTML =
-    `<div style="margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--sub)">Session</div>`
-    + sessionFilterHTML
-    + `<div style="margin-top:10px;margin-bottom:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--sub)">School</div>`
-    + ['All',...SCHOOLS].map(s =>
-        `<button class="sf-btn ${activeSchool===s?'active':''}" onclick="setSchool('${s.replace(/'/g,"\\'")}')">
-          ${s==='All'?'All schools':s}
-        </button>`).join('');
 
   const sessE    = entries.filter(e => sessionForEntry(e) === sessKey);
   const filtered = activeSchool === 'All' ? sessE : sessE.filter(e => e.school === activeSchool);
@@ -1050,15 +1063,10 @@ function initLookfors() {
   }
 }
 
-// Update header to show current session
-function updateSessionLabel() {
-  const s = SESSION_RANGES.find(s => s.key === activeSession);
-  const el = document.getElementById('current-session-label');
-  if (el && s) el.textContent = s.label;
-}
-
 initLookfors();
-updateSessionLabel();
+// Set dropdown to current session on load
+const _initSel = document.getElementById('sess-sel');
+if (_initSel) _initSel.value = activeSession;
 loadEntries();
 </script>
 </body>
