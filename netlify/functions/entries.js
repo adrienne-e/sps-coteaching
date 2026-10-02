@@ -6,10 +6,10 @@ var __commonJS = (cb, mod) => function __require() {
     throw mod = 0, e;
   }
 };
-
-// node_modules/@netlify/blobs/dist/main.cjs
+ 
+// node_modules/@netlify/runtime-utils/dist/main.cjs
 var require_main = __commonJS({
-  "node_modules/@netlify/blobs/dist/main.cjs"(exports2, module2) {
+  "node_modules/@netlify/runtime-utils/dist/main.cjs"(exports2, module2) {
     "use strict";
     var __defProp = Object.defineProperty;
     var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -30,6 +30,113 @@ var require_main = __commonJS({
     var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
     var main_exports = {};
     __export(main_exports, {
+      base64Decode: () => base64Decode,
+      base64Encode: () => base64Encode,
+      getEnvironment: () => getEnvironment
+    });
+    module2.exports = __toCommonJS(main_exports);
+    var getString = (input) => typeof input === "string" ? input : JSON.stringify(input);
+    var base64Decode = globalThis.Buffer ? (input) => Buffer.from(input, "base64").toString() : (input) => atob(input);
+    var base64Encode = globalThis.Buffer ? (input) => Buffer.from(getString(input)).toString("base64") : (input) => btoa(getString(input));
+    var getEnvironment = () => {
+      const { Deno, Netlify, process: process2 } = globalThis;
+      return Netlify?.env ?? Deno?.env ?? {
+        delete: (key) => delete process2?.env[key],
+        get: (key) => process2?.env[key],
+        has: (key) => Boolean(process2?.env[key]),
+        set: (key, value) => {
+          if (process2?.env) {
+            process2.env[key] = value;
+          }
+        },
+        toObject: () => process2?.env ?? {}
+      };
+    };
+  }
+});
+ 
+// node_modules/@netlify/otel/dist/main.cjs
+var require_main2 = __commonJS({
+  "node_modules/@netlify/otel/dist/main.cjs"(exports2, module2) {
+    "use strict";
+    var __defProp = Object.defineProperty;
+    var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+    var __getOwnPropNames2 = Object.getOwnPropertyNames;
+    var __hasOwnProp = Object.prototype.hasOwnProperty;
+    var __export = (target, all) => {
+      for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+    };
+    var __copyProps = (to, from, except, desc) => {
+      if (from && typeof from === "object" || typeof from === "function") {
+        for (let key of __getOwnPropNames2(from))
+          if (!__hasOwnProp.call(to, key) && key !== except)
+            __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+      }
+      return to;
+    };
+    var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+    var main_exports = {};
+    __export(main_exports, {
+      getTracer: () => getTracer,
+      shutdownTracers: () => shutdownTracers,
+      withActiveSpan: () => withActiveSpan
+    });
+    module2.exports = __toCommonJS(main_exports);
+    var GET_TRACER = "__netlify__getTracer";
+    var SHUTDOWN_TRACERS = "__netlify__shutdownTracers";
+    var getTracer = (name, version) => {
+      return globalThis[GET_TRACER]?.(name, version);
+    };
+    var shutdownTracers = async () => {
+      return globalThis[SHUTDOWN_TRACERS]?.();
+    };
+    function withActiveSpan(tracer, name, optionsOrFn, contextOrFn, fn) {
+      const func = typeof contextOrFn === "function" ? contextOrFn : typeof optionsOrFn === "function" ? optionsOrFn : fn;
+      if (!func) {
+        throw new Error("function to execute with active span is missing");
+      }
+      if (!tracer) {
+        return func();
+      }
+      return tracer.withActiveSpan(name, optionsOrFn, contextOrFn, func);
+    }
+  }
+});
+ 
+// node_modules/@netlify/blobs/dist/main.cjs
+var require_main3 = __commonJS({
+  "node_modules/@netlify/blobs/dist/main.cjs"(exports2, module2) {
+    "use strict";
+    var __create = Object.create;
+    var __defProp = Object.defineProperty;
+    var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+    var __getOwnPropNames2 = Object.getOwnPropertyNames;
+    var __getProtoOf = Object.getPrototypeOf;
+    var __hasOwnProp = Object.prototype.hasOwnProperty;
+    var __export = (target, all) => {
+      for (var name in all)
+        __defProp(target, name, { get: all[name], enumerable: true });
+    };
+    var __copyProps = (to, from, except, desc) => {
+      if (from && typeof from === "object" || typeof from === "function") {
+        for (let key of __getOwnPropNames2(from))
+          if (!__hasOwnProp.call(to, key) && key !== except)
+            __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+      }
+      return to;
+    };
+    var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+      // If the importer is in node compatibility mode or this is not an ESM
+      // file that has been converted to a CommonJS file using a Babel-
+      // compatible transform (i.e. "__esModule" has not been set), then set
+      // "default" to the CommonJS "module.exports" for node compatibility.
+      isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+      mod
+    ));
+    var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+    var main_exports = {};
+    __export(main_exports, {
       connectLambda: () => connectLambda,
       getDeployStore: () => getDeployStore,
       getStore: () => getStore2,
@@ -37,59 +144,13 @@ var require_main = __commonJS({
       setEnvironmentContext: () => setEnvironmentContext
     });
     module2.exports = __toCommonJS(main_exports);
-    var NF_ERROR = "x-nf-error";
-    var NF_REQUEST_ID = "x-nf-request-id";
-    var BlobsInternalError = class extends Error {
-      constructor(res) {
-        let details = res.headers.get(NF_ERROR) || `${res.status} status code`;
-        if (res.headers.has(NF_REQUEST_ID)) {
-          details += `, ID: ${res.headers.get(NF_REQUEST_ID)}`;
-        }
-        super(`Netlify Blobs has generated an internal error (${details})`);
-        this.name = "BlobsInternalError";
-      }
-    };
-    var collectIterator = async (iterator) => {
-      const result = [];
-      for await (const item of iterator) {
-        result.push(item);
-      }
-      return result;
-    };
-    var base64Decode = (input) => {
-      const { Buffer: Buffer2 } = globalThis;
-      if (Buffer2) {
-        return Buffer2.from(input, "base64").toString();
-      }
-      return atob(input);
-    };
-    var base64Encode = (input) => {
-      const { Buffer: Buffer2 } = globalThis;
-      if (Buffer2) {
-        return Buffer2.from(input).toString("base64");
-      }
-      return btoa(input);
-    };
-    var getEnvironment = () => {
-      const { Deno, Netlify, process } = globalThis;
-      return Netlify?.env ?? Deno?.env ?? {
-        delete: (key) => delete process?.env[key],
-        get: (key) => process?.env[key],
-        has: (key) => Boolean(process?.env[key]),
-        set: (key, value) => {
-          if (process?.env) {
-            process.env[key] = value;
-          }
-        },
-        toObject: () => process?.env ?? {}
-      };
-    };
+    var import_runtime_utils = require_main();
     var getEnvironmentContext = () => {
-      const context = globalThis.netlifyBlobsContext || getEnvironment().get("NETLIFY_BLOBS_CONTEXT");
+      const context = globalThis.netlifyBlobsContext || (0, import_runtime_utils.getEnvironment)().get("NETLIFY_BLOBS_CONTEXT");
       if (typeof context !== "string" || !context) {
         return {};
       }
-      const data = base64Decode(context);
+      const data = (0, import_runtime_utils.base64Decode)(context);
       try {
         return JSON.parse(data);
       } catch {
@@ -97,8 +158,8 @@ var require_main = __commonJS({
       return {};
     };
     var setEnvironmentContext = (context) => {
-      const encodedContext = base64Encode(JSON.stringify(context));
-      getEnvironment().set("NETLIFY_BLOBS_CONTEXT", encodedContext);
+      const encodedContext = (0, import_runtime_utils.base64Encode)(JSON.stringify(context));
+      (0, import_runtime_utils.getEnvironment)().set("NETLIFY_BLOBS_CONTEXT", encodedContext);
     };
     var MissingBlobsEnvironmentError = class extends Error {
       constructor(requiredProperties) {
@@ -110,8 +171,9 @@ var require_main = __commonJS({
         this.name = "MissingBlobsEnvironmentError";
       }
     };
+    var import_runtime_utils2 = require_main();
     var connectLambda = (event) => {
-      const rawData = base64Decode(event.blobs);
+      const rawData = (0, import_runtime_utils2.base64Decode)(event.blobs);
       const data = JSON.parse(rawData);
       const environmentContext = {
         deployID: event.headers["x-nf-deploy-id"],
@@ -129,6 +191,7 @@ var require_main = __commonJS({
         this.name = "BlobsConsistencyError";
       }
     };
+    var import_runtime_utils3 = require_main();
     var BASE64_PREFIX = "b64;";
     var METADATA_HEADER_INTERNAL = "x-amz-meta-user";
     var METADATA_HEADER_EXTERNAL = "netlify-blobs-metadata";
@@ -137,7 +200,7 @@ var require_main = __commonJS({
       if (!metadata) {
         return null;
       }
-      const encodedObject = base64Encode(JSON.stringify(metadata));
+      const encodedObject = (0, import_runtime_utils3.base64Encode)(JSON.stringify(metadata));
       const payload = `b64;${encodedObject}`;
       if (METADATA_HEADER_EXTERNAL.length + payload.length > METADATA_MAX_SIZE) {
         throw new Error("Metadata object exceeds the maximum size");
@@ -145,11 +208,11 @@ var require_main = __commonJS({
       return payload;
     };
     var decodeMetadata = (header) => {
-      if (!header || !header.startsWith(BASE64_PREFIX)) {
+      if (!header?.startsWith(BASE64_PREFIX)) {
         return {};
       }
       const encodedData = header.slice(BASE64_PREFIX.length);
-      const decodedData = base64Decode(encodedData);
+      const decodedData = (0, import_runtime_utils3.base64Decode)(encodedData);
       const metadata = JSON.parse(decodedData);
       return metadata;
     };
@@ -183,17 +246,20 @@ var require_main = __commonJS({
         this.name = "InvalidBlobsRegionError";
       }
     };
-    var DEFAULT_RETRY_DELAY = getEnvironment().get("NODE_ENV") === "test" ? 1 : 5e3;
+    var import_runtime_utils4 = require_main();
+    var DEFAULT_RETRY_DELAY = (0, import_runtime_utils4.getEnvironment)().get("NODE_ENV") === "test" ? 1 : 5e3;
     var MIN_RETRY_DELAY = 1e3;
     var MAX_RETRY = 5;
     var RATE_LIMIT_HEADER = "X-RateLimit-Reset";
-    var fetchAndRetry = async (fetch, url, options, attemptsLeft = MAX_RETRY) => {
+    var fetchAndRetry = async (fetch, url, options, attemptsLeft = MAX_RETRY, getRetryUrl) => {
       try {
         const res = await fetch(url, options);
-        if (attemptsLeft > 0 && (res.status === 429 || res.status >= 500)) {
+        const isRetryable = res.status === 429 || res.status >= 500 || getRetryUrl !== void 0 && res.status === 403;
+        if (attemptsLeft > 0 && isRetryable) {
           const delay = getDelay(res.headers.get(RATE_LIMIT_HEADER));
           await sleep(delay);
-          return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
+          const retryUrl = getRetryUrl ? await getRetryUrl() : url;
+          return fetchAndRetry(fetch, retryUrl, options, attemptsLeft - 1, getRetryUrl);
         }
         return res;
       } catch (error) {
@@ -202,7 +268,8 @@ var require_main = __commonJS({
         }
         const delay = getDelay();
         await sleep(delay);
-        return fetchAndRetry(fetch, url, options, attemptsLeft - 1);
+        const retryUrl = getRetryUrl ? await getRetryUrl() : url;
+        return fetchAndRetry(fetch, retryUrl, options, attemptsLeft - 1, getRetryUrl);
       }
     };
     var getDelay = (rateLimitReset) => {
@@ -214,8 +281,66 @@ var require_main = __commonJS({
     var sleep = (ms) => new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
+    var import_node_process = __toESM(require("process"), 1);
+    var import_otel = require_main2();
+    var NF_ERROR = "x-nf-error";
+    var NF_REQUEST_ID = "x-nf-request-id";
+    var DEPLOY_STORE_PREFIX = "deploy:";
+    var SITE_STORE_PREFIX = "site:";
+    var isDeniedWrite = (res, { method, storeName }) => (res.status === 401 || res.status === 403) && (method === "put" || method === "delete") && storeName !== void 0 && !storeName.startsWith(DEPLOY_STORE_PREFIX);
+    var blobsErrorMessage = (res, context, responseBody) => {
+      let details = res.headers.get(NF_ERROR) || `${res.status} status code`;
+      if (res.headers.has(NF_REQUEST_ID)) {
+        details += `, ID: ${res.headers.get(NF_REQUEST_ID)}`;
+      }
+      if (isDeniedWrite(res, context)) {
+        const storeName = context.storeName?.startsWith(SITE_STORE_PREFIX) ? context.storeName.slice(SITE_STORE_PREFIX.length) : context.storeName;
+        const summary = `Netlify Blobs could not write to store '${storeName}' (${details}).`;
+        if (context.edgeAccess) {
+          return summary;
+        }
+        return `${summary} Builds and build plugins can only write to deploy-specific stores: use 'getDeployStore' instead of 'getStore', or pass a 'token' with write access to the store. If this code is not running in a build, check that the token and site ID are valid. See https://docs.netlify.com/build/data-and-storage/netlify-blobs/#deploy-specific-stores`;
+      }
+      let message = `Netlify Blobs has generated an internal error (${details})`;
+      if (!res.headers.get(NF_ERROR) && responseBody) {
+        message += `: ${responseBody}`;
+      }
+      return message;
+    };
+    var BlobsInternalError = class extends Error {
+      constructor(res, context = {}, responseBody) {
+        super(blobsErrorMessage(res, context, responseBody));
+        this.name = "BlobsInternalError";
+        this.status = res.status;
+        this.responseBody = responseBody;
+      }
+    };
+    var createBlobsInternalError = async (res, context = {}) => {
+      const responseBody = await res.clone().text().catch(() => void 0);
+      return new BlobsInternalError(res, context, responseBody);
+    };
+    var collectIterator = async (iterator) => {
+      const result = [];
+      for await (const item of iterator) {
+        result.push(item);
+      }
+      return result;
+    };
+    function withSpan(span, name, fn) {
+      if (span) return fn(span);
+      return (0, import_otel.withActiveSpan)((0, import_otel.getTracer)(), name, (span2) => {
+        return fn(span2);
+      });
+    }
     var SIGNED_URL_ACCEPT_HEADER = "application/json;type=signed-url";
     var Client = class {
+      /**
+       * Whether requests reach Blobs through the edge rather than the API. Only
+       * runtime environments are given an edge URL.
+       */
+      get edgeAccess() {
+        return this.edgeURL !== void 0;
+      }
       constructor({ apiURL, consistency, edgeURL, fetch, region, siteID, token, uncachedEdgeURL }) {
         this.apiURL = apiURL;
         this.consistency = consistency ?? "eventual";
@@ -298,7 +423,7 @@ var require_main = __commonJS({
           method
         });
         if (res.status !== 200) {
-          throw new BlobsInternalError(res);
+          throw await createBlobsInternalError(res, { edgeAccess: this.edgeAccess, method, storeName });
         }
         const { url: signedURL } = await res.json();
         const userHeaders = encodedMetadata ? { [METADATA_HEADER_INTERNAL]: encodedMetadata } : void 0;
@@ -309,6 +434,7 @@ var require_main = __commonJS({
       }
       async makeRequest({
         body,
+        conditions = {},
         consistency,
         headers: extraHeaders,
         key,
@@ -332,6 +458,11 @@ var require_main = __commonJS({
         if (method === "put") {
           headers["cache-control"] = "max-age=0, stale-while-revalidate=60";
         }
+        if ("onlyIfMatch" in conditions && conditions.onlyIfMatch) {
+          headers["if-match"] = conditions.onlyIfMatch;
+        } else if ("onlyIfNew" in conditions && conditions.onlyIfNew) {
+          headers["if-none-match"] = "*";
+        }
         const options = {
           body,
           headers,
@@ -340,7 +471,15 @@ var require_main = __commonJS({
         if (body instanceof ReadableStream) {
           options.duplex = "half";
         }
-        return fetchAndRetry(this.fetch, url, options);
+        const usesSignedUrl = !this.edgeURL && key !== void 0 && storeName !== void 0 && method !== "head" && method !== "delete";
+        let getRetryUrl;
+        if (usesSignedUrl) {
+          getRetryUrl = async () => {
+            const finalRequest = await this.getFinalRequest({ consistency, key, metadata, method, parameters, storeName });
+            return finalRequest.url;
+          };
+        }
+        return fetchAndRetry(this.fetch, url, options, void 0, getRetryUrl);
       }
     };
     var getClientOptions = (options, contextOverride) => {
@@ -365,9 +504,9 @@ var require_main = __commonJS({
       };
       return clientOptions;
     };
-    var DEPLOY_STORE_PREFIX = "deploy:";
     var LEGACY_STORE_INTERNAL_PREFIX = "netlify-internal/legacy-namespace/";
-    var SITE_STORE_PREFIX = "site:";
+    var STATUS_OK = 200;
+    var STATUS_PRE_CONDITION_FAILED = 412;
     var Store = class _Store {
       constructor(options) {
         this.client = options.client;
@@ -390,138 +529,276 @@ var require_main = __commonJS({
       async delete(key) {
         const res = await this.client.makeRequest({ key, method: "delete", storeName: this.name });
         if (![200, 204, 404].includes(res.status)) {
-          throw new BlobsInternalError(res);
+          throw new BlobsInternalError(res, {
+            edgeAccess: this.client.edgeAccess,
+            method: "delete",
+            storeName: this.name
+          });
         }
+      }
+      async deleteAll() {
+        let totalDeletedBlobs = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const res = await this.client.makeRequest({ method: "delete", storeName: this.name });
+          if (res.status !== 200) {
+            throw new BlobsInternalError(res, {
+              edgeAccess: this.client.edgeAccess,
+              method: "delete",
+              storeName: this.name
+            });
+          }
+          const data = await res.json();
+          if (typeof data.blobs_deleted !== "number") {
+            throw new BlobsInternalError(res);
+          }
+          totalDeletedBlobs += data.blobs_deleted;
+          hasMore = typeof data.has_more === "boolean" && data.has_more;
+        }
+        return {
+          deletedBlobs: totalDeletedBlobs
+        };
       }
       async get(key, options) {
-        const { consistency, type } = options ?? {};
-        const res = await this.client.makeRequest({ consistency, key, method: "get", storeName: this.name });
-        if (res.status === 404) {
-          return null;
-        }
-        if (res.status !== 200) {
+        return withSpan(options?.span, "blobs.get", async (span) => {
+          const { consistency, type } = options ?? {};
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.key": key,
+            "blobs.type": type,
+            "blobs.method": "GET",
+            "blobs.consistency": consistency
+          });
+          const res = await this.client.makeRequest({
+            consistency,
+            key,
+            method: "get",
+            storeName: this.name
+          });
+          span?.setAttributes({
+            "blobs.response.body.size": res.headers.get("content-length") ?? void 0,
+            "blobs.response.status": res.status
+          });
+          if (res.status === 404) {
+            return null;
+          }
+          if (res.status !== 200) {
+            throw new BlobsInternalError(res);
+          }
+          if (type === void 0 || type === "text") {
+            return res.text();
+          }
+          if (type === "arrayBuffer") {
+            return res.arrayBuffer();
+          }
+          if (type === "blob") {
+            return res.blob();
+          }
+          if (type === "json") {
+            return res.json();
+          }
+          if (type === "stream") {
+            return res.body;
+          }
           throw new BlobsInternalError(res);
-        }
-        if (type === void 0 || type === "text") {
-          return res.text();
-        }
-        if (type === "arrayBuffer") {
-          return res.arrayBuffer();
-        }
-        if (type === "blob") {
-          return res.blob();
-        }
-        if (type === "json") {
-          return res.json();
-        }
-        if (type === "stream") {
-          return res.body;
-        }
-        throw new BlobsInternalError(res);
+        });
       }
-      async getMetadata(key, { consistency } = {}) {
-        const res = await this.client.makeRequest({ consistency, key, method: "head", storeName: this.name });
-        if (res.status === 404) {
-          return null;
-        }
-        if (res.status !== 200 && res.status !== 304) {
-          throw new BlobsInternalError(res);
-        }
-        const etag = res?.headers.get("etag") ?? void 0;
-        const metadata = getMetadataFromResponse(res);
-        const result = {
-          etag,
-          metadata
-        };
-        return result;
+      async getMetadata(key, options = {}) {
+        return withSpan(options?.span, "blobs.getMetadata", async (span) => {
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.key": key,
+            "blobs.method": "HEAD",
+            "blobs.consistency": options.consistency
+          });
+          const res = await this.client.makeRequest({
+            consistency: options.consistency,
+            key,
+            method: "head",
+            storeName: this.name
+          });
+          span?.setAttributes({
+            "blobs.response.status": res.status
+          });
+          if (res.status === 404) {
+            return null;
+          }
+          if (res.status !== 200 && res.status !== 304) {
+            throw new BlobsInternalError(res);
+          }
+          const etag = res?.headers.get("etag") ?? void 0;
+          const metadata = getMetadataFromResponse(res);
+          const result = {
+            etag,
+            metadata
+          };
+          return result;
+        });
       }
       async getWithMetadata(key, options) {
-        const { consistency, etag: requestETag, type } = options ?? {};
-        const headers = requestETag ? { "if-none-match": requestETag } : void 0;
-        const res = await this.client.makeRequest({
-          consistency,
-          headers,
-          key,
-          method: "get",
-          storeName: this.name
+        return withSpan(options?.span, "blobs.getWithMetadata", async (span) => {
+          const { consistency, etag: requestETag, type } = options ?? {};
+          const headers = requestETag ? { "if-none-match": requestETag } : void 0;
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.key": key,
+            "blobs.method": "GET",
+            "blobs.consistency": options?.consistency,
+            "blobs.type": type,
+            "blobs.request.etag": requestETag
+          });
+          const res = await this.client.makeRequest({
+            consistency,
+            headers,
+            key,
+            method: "get",
+            storeName: this.name
+          });
+          const responseETag = res?.headers.get("etag") ?? void 0;
+          span?.setAttributes({
+            "blobs.response.body.size": res.headers.get("content-length") ?? void 0,
+            "blobs.response.etag": responseETag,
+            "blobs.response.status": res.status
+          });
+          if (res.status === 404) {
+            return null;
+          }
+          if (res.status !== 200 && res.status !== 304) {
+            throw new BlobsInternalError(res);
+          }
+          const metadata = getMetadataFromResponse(res);
+          const result = {
+            etag: responseETag,
+            metadata
+          };
+          if (res.status === 304 && requestETag) {
+            return { data: null, ...result };
+          }
+          if (type === void 0 || type === "text") {
+            return { data: await res.text(), ...result };
+          }
+          if (type === "arrayBuffer") {
+            return { data: await res.arrayBuffer(), ...result };
+          }
+          if (type === "blob") {
+            return { data: await res.blob(), ...result };
+          }
+          if (type === "json") {
+            return { data: await res.json(), ...result };
+          }
+          if (type === "stream") {
+            return { data: res.body, ...result };
+          }
+          throw new Error(`Invalid 'type' property: ${type}. Expected: arrayBuffer, blob, json, stream, or text.`);
         });
-        if (res.status === 404) {
-          return null;
-        }
-        if (res.status !== 200 && res.status !== 304) {
-          throw new BlobsInternalError(res);
-        }
-        const responseETag = res?.headers.get("etag") ?? void 0;
-        const metadata = getMetadataFromResponse(res);
-        const result = {
-          etag: responseETag,
-          metadata
-        };
-        if (res.status === 304 && requestETag) {
-          return { data: null, ...result };
-        }
-        if (type === void 0 || type === "text") {
-          return { data: await res.text(), ...result };
-        }
-        if (type === "arrayBuffer") {
-          return { data: await res.arrayBuffer(), ...result };
-        }
-        if (type === "blob") {
-          return { data: await res.blob(), ...result };
-        }
-        if (type === "json") {
-          return { data: await res.json(), ...result };
-        }
-        if (type === "stream") {
-          return { data: res.body, ...result };
-        }
-        throw new Error(`Invalid 'type' property: ${type}. Expected: arrayBuffer, blob, json, stream, or text.`);
       }
       list(options = {}) {
-        const iterator = this.getListIterator(options);
-        if (options.paginate) {
-          return iterator;
-        }
-        return collectIterator(iterator).then(
-          (items) => items.reduce(
-            (acc, item) => ({
-              blobs: [...acc.blobs, ...item.blobs],
-              directories: [...acc.directories, ...item.directories]
-            }),
-            { blobs: [], directories: [] }
-          )
-        );
-      }
-      async set(key, data, { metadata } = {}) {
-        _Store.validateKey(key);
-        const res = await this.client.makeRequest({
-          body: data,
-          key,
-          metadata,
-          method: "put",
-          storeName: this.name
+        return withSpan(options.span, "blobs.list", (span) => {
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.method": "GET",
+            "blobs.list.paginate": options.paginate ?? false
+          });
+          const iterator = this.getListIterator(options);
+          if (options.paginate) {
+            return iterator;
+          }
+          return collectIterator(iterator).then(
+            (items) => items.reduce(
+              (acc, item) => ({
+                blobs: [...acc.blobs, ...item.blobs],
+                directories: [...acc.directories, ...item.directories]
+              }),
+              { blobs: [], directories: [] }
+            )
+          );
         });
-        if (res.status !== 200) {
-          throw new BlobsInternalError(res);
-        }
       }
-      async setJSON(key, data, { metadata } = {}) {
-        _Store.validateKey(key);
-        const payload = JSON.stringify(data);
-        const headers = {
-          "content-type": "application/json"
-        };
-        const res = await this.client.makeRequest({
-          body: payload,
-          headers,
-          key,
-          metadata,
-          method: "put",
-          storeName: this.name
+      async set(key, data, options = {}) {
+        return withSpan(options.span, "blobs.set", async (span) => {
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.key": key,
+            "blobs.method": "PUT",
+            "blobs.data.size": typeof data == "string" ? data.length : data instanceof Blob ? data.size : data.byteLength,
+            "blobs.data.type": typeof data == "string" ? "string" : data instanceof Blob ? "blob" : "arrayBuffer",
+            "blobs.atomic": Boolean(options.onlyIfMatch ?? options.onlyIfNew)
+          });
+          _Store.validateKey(key);
+          const conditions = _Store.getConditions(options);
+          const res = await this.client.makeRequest({
+            conditions,
+            body: data,
+            key,
+            metadata: options.metadata,
+            method: "put",
+            storeName: this.name
+          });
+          const etag = res.headers.get("etag") ?? "";
+          span?.setAttributes({
+            "blobs.response.etag": etag,
+            "blobs.response.status": res.status
+          });
+          if (conditions) {
+            return res.status === STATUS_PRE_CONDITION_FAILED ? { modified: false } : { etag, modified: true };
+          }
+          if (res.status === STATUS_OK) {
+            return {
+              etag,
+              modified: true
+            };
+          }
+          throw await createBlobsInternalError(res, {
+            edgeAccess: this.client.edgeAccess,
+            method: "put",
+            storeName: this.name
+          });
         });
-        if (res.status !== 200) {
-          throw new BlobsInternalError(res);
-        }
+      }
+      async setJSON(key, data, options = {}) {
+        return withSpan(options.span, "blobs.setJSON", async (span) => {
+          span?.setAttributes({
+            "blobs.store": this.name,
+            "blobs.key": key,
+            "blobs.method": "PUT",
+            "blobs.data.type": "json",
+            "blobs.atomic": Boolean(options.onlyIfMatch ?? options.onlyIfNew)
+          });
+          _Store.validateKey(key);
+          const conditions = _Store.getConditions(options);
+          const payload = JSON.stringify(data);
+          const headers = {
+            "content-type": "application/json"
+          };
+          const res = await this.client.makeRequest({
+            conditions,
+            body: payload,
+            headers,
+            key,
+            metadata: options.metadata,
+            method: "put",
+            storeName: this.name
+          });
+          const etag = res.headers.get("etag") ?? "";
+          span?.setAttributes({
+            "blobs.response.etag": etag,
+            "blobs.response.status": res.status
+          });
+          if (conditions) {
+            return res.status === STATUS_PRE_CONDITION_FAILED ? { modified: false } : { etag, modified: true };
+          }
+          if (res.status === STATUS_OK) {
+            return {
+              etag,
+              modified: true
+            };
+          }
+          throw new BlobsInternalError(res, {
+            edgeAccess: this.client.edgeAccess,
+            method: "put",
+            storeName: this.name
+          });
+        });
       }
       static formatListResultBlob(result) {
         if (!result.key) {
@@ -531,6 +808,31 @@ var require_main = __commonJS({
           etag: result.etag,
           key: result.key
         };
+      }
+      static getConditions(options) {
+        if ("onlyIfMatch" in options && "onlyIfNew" in options) {
+          throw new Error(
+            `The 'onlyIfMatch' and 'onlyIfNew' options are mutually exclusive. Using 'onlyIfMatch' will make the write succeed only if there is an entry for the key with the given content, while 'onlyIfNew' will make the write succeed only if there is no entry for the key.`
+          );
+        }
+        if ("onlyIfMatch" in options && options.onlyIfMatch) {
+          if (typeof options.onlyIfMatch !== "string") {
+            throw new Error(`The 'onlyIfMatch' property expects a string representing an ETag.`);
+          }
+          return {
+            onlyIfMatch: options.onlyIfMatch
+          };
+        }
+        if ("onlyIfNew" in options && options.onlyIfNew) {
+          if (typeof options.onlyIfNew !== "boolean") {
+            throw new Error(
+              `The 'onlyIfNew' property expects a boolean indicating whether the write should fail if an entry for the key already exists.`
+            );
+          }
+          return {
+            onlyIfNew: true
+          };
+        }
       }
       static validateKey(key) {
         if (key === "") {
@@ -575,89 +877,97 @@ var require_main = __commonJS({
             let done = false;
             return {
               async next() {
-                if (done) {
-                  return { done: true, value: void 0 };
-                }
-                const nextParameters = { ...parameters };
-                if (currentCursor !== null) {
-                  nextParameters.cursor = currentCursor;
-                }
-                const res = await client.makeRequest({
-                  method: "get",
-                  parameters: nextParameters,
-                  storeName
-                });
-                let blobs = [];
-                let directories = [];
-                if (![200, 204, 404].includes(res.status)) {
-                  throw new BlobsInternalError(res);
-                }
-                if (res.status === 404) {
-                  done = true;
-                } else {
-                  const page = await res.json();
-                  if (page.next_cursor) {
-                    currentCursor = page.next_cursor;
-                  } else {
+                return withSpan(options?.span, "blobs.list.next", async (span) => {
+                  span?.setAttributes({
+                    "blobs.store": storeName,
+                    "blobs.method": "GET",
+                    "blobs.list.paginate": options?.paginate ?? false,
+                    "blobs.list.done": done,
+                    "blobs.list.cursor": currentCursor ?? void 0
+                  });
+                  if (done) {
+                    return { done: true, value: void 0 };
+                  }
+                  const nextParameters = { ...parameters };
+                  if (currentCursor !== null) {
+                    nextParameters.cursor = currentCursor;
+                  }
+                  const res = await client.makeRequest({
+                    method: "get",
+                    parameters: nextParameters,
+                    storeName
+                  });
+                  span?.setAttributes({
+                    "blobs.response.status": res.status
+                  });
+                  let blobs = [];
+                  let directories = [];
+                  if (![200, 204, 404].includes(res.status)) {
+                    throw new BlobsInternalError(res);
+                  }
+                  if (res.status === 404) {
                     done = true;
+                  } else {
+                    const page = await res.json();
+                    if (page.next_cursor) {
+                      currentCursor = page.next_cursor;
+                    } else {
+                      done = true;
+                    }
+                    blobs = (page.blobs ?? []).map(_Store.formatListResultBlob).filter(Boolean);
+                    directories = page.directories ?? [];
                   }
-                  blobs = (page.blobs ?? []).map(_Store.formatListResultBlob).filter(Boolean);
-                  directories = page.directories ?? [];
-                }
-                return {
-                  done: false,
-                  value: {
-                    blobs,
-                    directories
-                  }
-                };
+                  return {
+                    done: false,
+                    value: {
+                      blobs,
+                      directories
+                    }
+                  };
+                });
               }
             };
           }
         };
       }
     };
-    var getDeployStore = (input = {}) => {
+    var getDeployStoreRegion = (clientOptions, context) => {
+      if (clientOptions.region) {
+        return clientOptions.region;
+      }
+      if (clientOptions.edgeURL || clientOptions.uncachedEdgeURL) {
+        if (!context.primaryRegion) {
+          throw new Error(
+            "When accessing a deploy store, the Netlify Blobs client needs to be configured with a region, and one was not found in the environment. To manually set the region, set the `region` property in the store options. If you are using the Netlify CLI, you may have an outdated version; run `npm install -g netlify-cli@latest` to update and try again."
+          );
+        }
+        return context.primaryRegion;
+      }
+      return REGION_AUTO;
+    };
+    var getDeployStore = (input = {}, options) => {
       const context = getEnvironmentContext();
-      const options = typeof input === "string" ? { name: input } : input;
-      const deployID = options.deployID ?? context.deployID;
+      const mergedOptions = typeof input === "string" ? { ...options, name: input } : input;
+      const deployID = mergedOptions.deployID ?? context.deployID;
       if (!deployID) {
         throw new MissingBlobsEnvironmentError(["deployID"]);
       }
-      const clientOptions = getClientOptions(options, context);
-      if (!clientOptions.region) {
-        if (clientOptions.edgeURL || clientOptions.uncachedEdgeURL) {
-          if (!context.primaryRegion) {
-            throw new Error(
-              "When accessing a deploy store, the Netlify Blobs client needs to be configured with a region, and one was not found in the environment. To manually set the region, set the `region` property in the `getDeployStore` options. If you are using the Netlify CLI, you may have an outdated version; run `npm install -g netlify-cli@latest` to update and try again."
-            );
-          }
-          clientOptions.region = context.primaryRegion;
-        } else {
-          clientOptions.region = REGION_AUTO;
-        }
-      }
+      const clientOptions = getClientOptions(mergedOptions, context);
+      clientOptions.region = getDeployStoreRegion(clientOptions, context);
       const client = new Client(clientOptions);
-      return new Store({ client, deployID, name: options.name });
+      return new Store({ client, deployID, name: mergedOptions.name });
     };
-    var getStore2 = (input) => {
+    var getStore2 = (input, options) => {
       if (typeof input === "string") {
-        const clientOptions = getClientOptions({});
+        const contextOverride = options?.siteID && options?.token ? { siteID: options?.siteID, token: options?.token } : void 0;
+        const clientOptions = getClientOptions(options ?? {}, contextOverride);
         const client = new Client(clientOptions);
         return new Store({ client, name: input });
       }
-      if (typeof input?.name === "string" && typeof input?.siteID === "string" && typeof input?.token === "string") {
-        const { name, siteID, token } = input;
-        const clientOptions = getClientOptions(input, { siteID, token });
-        if (!name || !siteID || !token) {
-          throw new MissingBlobsEnvironmentError(["name", "siteID", "token"]);
-        }
-        const client = new Client(clientOptions);
-        return new Store({ client, name });
-      }
       if (typeof input?.name === "string") {
         const { name } = input;
-        const clientOptions = getClientOptions(input);
+        const contextOverride = input?.siteID && input?.token ? { siteID: input?.siteID, token: input?.token } : void 0;
+        const clientOptions = getClientOptions(input, contextOverride);
         if (!name) {
           throw new MissingBlobsEnvironmentError(["name"]);
         }
@@ -665,11 +975,13 @@ var require_main = __commonJS({
         return new Store({ client, name });
       }
       if (typeof input?.deployID === "string") {
-        const clientOptions = getClientOptions(input);
+        const context = getEnvironmentContext();
+        const clientOptions = getClientOptions(input, context);
         const { deployID } = input;
         if (!deployID) {
           throw new MissingBlobsEnvironmentError(["deployID"]);
         }
+        clientOptions.region = getDeployStoreRegion(clientOptions, context);
         const client = new Client(clientOptions);
         return new Store({ client, deployID });
       }
@@ -732,13 +1044,21 @@ var require_main = __commonJS({
     };
   }
 });
-
-// netlify/functions/entries.js
-var { getStore } = require_main();
+ 
+// netlify/functions/entries-src.js
+var { getStore } = require_main3();
 var KEY = "entries";
 var STORE_NAME = "sps-coteaching-entries";
+function openStore() {
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token = process.env.NETLIFY_API_TOKEN || process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_BLOBS_TOKEN;
+  if (siteID && token) {
+    return getStore({ name: STORE_NAME, siteID, token });
+  }
+  return getStore(STORE_NAME);
+}
 exports.handler = async (event) => {
-  const store = getStore(STORE_NAME);
+  const store = openStore();
   if (event.httpMethod === "GET") {
     const data = await store.get(KEY, { type: "json" }) || [];
     return {
@@ -765,3 +1085,4 @@ exports.handler = async (event) => {
   }
   return { statusCode: 405, body: "Method not allowed" };
 };
+ 
